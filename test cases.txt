@@ -1,0 +1,22 @@
+Test Case 1: Use Bitwise Operations to Replace Ternary Operators for Determining Range Limits
+Test Case 2: Implement a Cache System Using a Static Array for Armstrong Numbers
+Test Case 3: Optimize Armstrong Number Check Using Pointer Arithmetic
+Test Case 4: Add Error Handling for Input/Output Operations
+Test Case 5: Add Error Handling for Memory Allocations
+Test Case 6: Implement Command-Line Argument Parser
+Test Case 7: Optimize Cube Calculation Using Inline Assembly for x86 Architecture
+Test Case 8: Implement Multi-Threading for Parallel Armstrong Number Checks
+Test Case 9: Add a Real-Time Progress Bar
+Test Case 10: Ensure ANSI C Compliance and Compile Without Warnings
+
+
+Test Case 1:  Passed 
+Test Case 2:  Passed
+Test Case 3:  Passed
+Test Case 4:  Passed
+Test Case 5:  Passed
+Test Case 6:  Passed
+Test Case 7:  Passed
+Test Case 8:  Passed
+Test Case 9:  Passed
+Test Case 10: Passed 
