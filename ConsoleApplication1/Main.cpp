@@ -28,6 +28,19 @@ public:
         }
         return value < other.value;
     }
+
+    // Serialize Item to JSON
+    friend void to_json(json& j, const Item& item) {
+        j = json{ {"id", item.id}, {"name", item.name}, {"value", item.value}, {"is_active", item.is_active} };
+    }
+
+    // Deserialize Item from JSON
+    friend void from_json(const json& j, Item& item) {
+        j.at("id").get_to(item.id);
+        j.at("name").get_to(item.name);
+        j.at("value").get_to(item.value);
+        j.at("is_active").get_to(item.is_active);
+    }
 };
 
 class ItemManager {
