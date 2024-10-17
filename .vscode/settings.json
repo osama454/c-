@@ -1,9 +1,0 @@
-{
-  "files.associations": {
-    "*.embeddedhtml": "html",
-    "time.h": "c",
-    "vector": "c",
-    "ostream": "cpp",
-    "cstdint": "cpp"
-  }
-}

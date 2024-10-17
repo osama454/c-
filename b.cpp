@@ -1,63 +1,121 @@
 #include <iostream>
-#include <mpi.h>
-#include <vector>
-#include <iomanip>
-#include "s_aes.h" // Include your S-AES implementation
+#include <queue>
+#include <string>
+#include <limits>
+#include <algorithm>
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
-    MPI_Init(&argc, &argv);
+// Structure to represent a client
+struct Client {
+    string name;
+    string vehicleBody;
+    int priority;
+};
 
-    int rank, size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    // Known plaintext and ciphertext (Example - Replace with your actual values)
-    uint16_t plaintext = 0x0123; 
-    uint16_t ciphertext = 0x5678; // The ciphertext corresponding to the plaintext after S-AES encryption
-
-    // Key space division
-    uint16_t key_space_size = 65536;
-    uint16_t keys_per_process = key_space_size / size;
-    uint16_t start_key = rank * keys_per_process;
-    uint16_t end_key = (rank == size - 1) ? key_space_size : start_key + keys_per_process;
+// Custom comparator for priority queue
+struct ComparePriority {
+    bool operator()(const Client& c1, const Client& c2) {
+        // Higher priority value means lower priority in the queue
+        return c1.priority > c2.priority;
+    }
+};
 
 
-    double start_time = MPI_Wtime(); // Start timer
+// Function to add a client to the queue
+void enqueueClient(priority_queue<Client, vector<Client>, ComparePriority>& clientQueue) {
+    Client client;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Used to clean the input buffer before a new client is added
+    cout << "Enter client name: ";
+    getline(cin, client.name);
+    while (client.name.empty()) {
+        cout << "Client name cannot be empty. Please enter a valid name: ";
+        getline(cin, client.name);
+    };
+    cout << "Enter vehicle body type (sedan, SUV, truck, motorcycle): ";
+    cin >> client.vehicleBody;
+    auto transformLowerCase = [] (string str) {
+        transform(str.begin(), str.end(), str.begin(), ::tolower);
+        return str;
+    };
+    string vehicleBodyLowerCase = transformLowerCase(client.vehicleBody);
+    cout << "Enter priority (1 or 2): ";
+    cin >> client.priority;
+    while (vehicleBodyLowerCase != "sedan" && vehicleBodyLowerCase != "suv" && vehicleBodyLowerCase != "truck" && vehicleBodyLowerCase != "motorcycle" || client.vehicleBody.empty() ) {
+        cout << "Invalid vehicle type. Please enter Sedan, SUV, Truck, or motorcycle: ";
+        cin >> client.vehicleBody;
+        vehicleBodyLowerCase = transformLowerCase(client.vehicleBody);
+    };
 
-    uint16_t found_key = 0;
-    bool key_found = false;
+    // Input validation for priority
+    while (cin.fail() || client.priority != 1 && client.priority != 2) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid priority. Please enter 1 or 2: ";
+        cin >> client.priority;
+    };
 
-    for (uint16_t key = start_key; key < end_key; ++key) {
-        uint16_t decrypted_text = s_aes_decrypt(ciphertext, key); // Use your S-AES decryption function
+    clientQueue.push(client);
+    cout << "Client added to the queue.\n";
+}
 
-        if (decrypted_text == plaintext) {
-            found_key = key;
-            key_found = true;
-            break; 
-        }
+// Function to check the next client in the queue
+void checkQueue(priority_queue<Client, vector<Client>, ComparePriority>& clientQueue) {
+    if (clientQueue.empty()) {
+        cout << "The queue is empty.\n";
+        return;
     }
 
-    // Broadcast if key is found
-    int key_found_int = key_found ? 1 : 0;  // Convert bool to int for MPI
-    MPI_Bcast(&key_found_int, 1, MPI_INT, rank, MPI_COMM_WORLD); // First, broadcast the flag
+    Client nextClient = clientQueue.top();
+    cout << "Next client in queue:\n";
+    cout << "Name: " << nextClient.name << endl;
+    cout << "Vehicle Body: " << nextClient.vehicleBody << endl;
+    cout << "Priority: " << nextClient.priority << endl;
+}
 
-    if (key_found_int) { // If any process found the key
-        MPI_Bcast(&found_key, 1, MPI_UNSIGNED_SHORT, rank, MPI_COMM_WORLD); // Broadcast the key itself
-
-        if (rank == 0) { // Rank 0 prints the result and time
-            double end_time = MPI_Wtime();
-            cout << "Key found: " << hex << found_key << endl;
-            cout << "Time taken: " << end_time - start_time << " seconds" << endl;
-        }
-    } else if (rank == 0) { // If no key is found
-        double end_time = MPI_Wtime();
-        cout << "Key not found." << endl;
-        cout << "Time taken: " << end_time - start_time << " seconds" << endl;
+// Function to dequeue the next client
+void dequeueClient(priority_queue<Client, vector<Client>, ComparePriority>& clientQueue) {
+    if (clientQueue.empty()) {
+        cout << "The queue is empty.\n";
+        return;
     }
 
+    Client dequeuedClient = clientQueue.top();
+    clientQueue.pop();
+    cout << "Client " << dequeuedClient.name << " dequeued.\n";
+}
 
-    MPI_Finalize();
+// Main function to run the program
+int main() {
+    priority_queue<Client, vector<Client>, ComparePriority> clientQueue;
+
+    int choice;
+    do {
+        cout << "\nGarage Management System\n";
+        cout << "1. Enqueue Client\n";
+        cout << "2. Check Queue\n";
+        cout << "3. Dequeue Client\n";
+        cout << "4. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                enqueueClient(clientQueue);
+                break;
+            case 2:
+                checkQueue(clientQueue);
+                break;
+            case 3:
+                dequeueClient(clientQueue);
+                break;
+            case 4:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 4);
+
     return 0;
 }
