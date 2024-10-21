@@ -1,17 +1,24 @@
-<script>
-  const getPrimes = Module.cwrap("get_primes", "number", ["number"]);
-
-  function findPrimes(nth) {
-    const primesPtr = getPrimes(nth);
-    const primes = [];
-    for (let i = 0; i < nth; i++) {
-      primes.push(Module.HEAP32[primesPtr / Int32Array.BYTES_PER_ELEMENT + i]);
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>WebAssembly Primes</title>
+</head>
+<body>
+  <script>
+    Module = {};
+    Module.onRuntimeInitialized = function() {
+      const getPrimes = Module.cwrap('get_primes', 'number', ['number']);
+      const n = 10; // Get the first 10 prime numbers
+      const primes = getPrimes(n);
+      const primeArray = [];
+      for (let i = 0; i < n; i++) {
+        primeArray.push(Module.HEAP32[primes/Int32Array.BYTES_PER_ELEMENT + i]);
+      }
+      console.log(primeArray); // Output the prime numbers
+      Module._free(primes); // Free the allocated memory
     }
-    Module._free(primesPtr);
-    return primes;
-  }
-
-  // Example usage:
-  const first10Primes = findPrimes(10);
-  console.log(first10Primes); // Output: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-</script>
+  </script>
+  <script src="primes.js"></script>
+</body>
+</html>

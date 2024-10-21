@@ -607,7 +607,7 @@ function createExportWrapper(name, nargs) {
 // include: runtime_exceptions.js
 // end include: runtime_exceptions.js
 function findWasmBinary() {
-    var f = 'get_primes.wasm';
+    var f = 'primes.wasm';
     if (!isDataURI(f)) {
       return locateFile(f);
     }

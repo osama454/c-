@@ -4,25 +4,22 @@
 extern "C" {
 
 EMSCRIPTEN_KEEPALIVE
-std::vector<int> get_primes(int nth) {
+std::vector<int> get_primes(int n) {
   std::vector<int> primes;
   primes.push_back(2);
-  int number = 3;
-  while (primes.size() < nth) {
+  int num = 3;
+  while (primes.size() < n) {
     bool is_prime = true;
-    for (int prime : primes) {
-      if (prime * prime > number) {
-        break;
-      }
-      if (number % prime == 0) {
+    for (int i = 0; i < primes.size() && primes[i] * primes[i] <= num; ++i) {
+      if (num % primes[i] == 0) {
         is_prime = false;
         break;
       }
     }
     if (is_prime) {
-      primes.push_back(number);
+      primes.push_back(num);
     }
-    number += 2;
+    num += 2;
   }
   return primes;
 }
