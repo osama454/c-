@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Numbers WebAssembly</title>
+</head>
+<body>
+    <h1>Compute Primes with WebAssembly</h1>
+    <button id="compute">Compute Primes</button>
+    <div id="result"></div>
+
+    <script>
+        // Load the WebAssembly Module
+        var Module = {
+            onRuntimeInitialized: function () {
+                document.getElementById("compute").addEventListener("click", function () {
+                    const n = 10;  // Example: Compute first 10 primes
+                    const ptr = Module._compute_primes(n);
+                    
+                    // Create a view to access the returned data
+                    const primes = new Int32Array(Module.HEAP32.buffer, ptr, n);
+                    
+                    // Display the result
+                    document.getElementById("result").innerText = "First " + n + " primes: " + primes.join(", ");
+                });
+            }
+        };
+
+        // Import the compiled WebAssembly module
+        fetch('ideal.js')
+            .then(response => response.text())
+            .then(eval);
+    </script>
+</body>
+</html>

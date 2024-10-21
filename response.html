@@ -1,0 +1,17 @@
+<script>
+  const getPrimes = Module.cwrap("get_primes", "number", ["number"]);
+
+  function findPrimes(nth) {
+    const primesPtr = getPrimes(nth);
+    const primes = [];
+    for (let i = 0; i < nth; i++) {
+      primes.push(Module.HEAP32[primesPtr / Int32Array.BYTES_PER_ELEMENT + i]);
+    }
+    Module._free(primesPtr);
+    return primes;
+  }
+
+  // Example usage:
+  const first10Primes = findPrimes(10);
+  console.log(first10Primes); // Output: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+</script>
